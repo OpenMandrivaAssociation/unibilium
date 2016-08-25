@@ -4,7 +4,7 @@
 
 Name:           unibilium
 Version:        1.2.0
-Release:        1
+Release:        2
 Summary:        A terminfo parsing library
 License:        LGPL-3.0+
 Group:          System/Libraries
@@ -44,7 +44,8 @@ This package holds the development files.
 %setup -q
 
 %build
-%make CFLAGS="%{optflags}" \
+%make CC=%{__cc} \
+     CFLAGS="%{optflags}" \
      LDFLAGS="%{ldflags}"
      PREFIX="%{_prefix}" \
      LIBDIR="%{_libdir}"
