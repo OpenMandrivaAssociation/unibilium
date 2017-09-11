@@ -3,8 +3,8 @@
 %define devname %mklibname unibilium -d
 
 Name:           unibilium
-Version:        1.2.0
-Release:        2
+Version:        1.2.1
+Release:        1
 Summary:        A terminfo parsing library
 License:        LGPL-3.0+
 Group:          System/Libraries
@@ -61,7 +61,7 @@ This package holds the development files.
 %{_libdir}/lib%{name}.so.*
 
 %files -n %{devname}
-%doc GPLv3 LGPLv3 LICENSE README
+%doc GPLv3 LGPLv3 LICENSE
 %{_includedir}/%{name}.h
 %{_libdir}/lib%{name}.so
 %{_libdir}/pkgconfig/%{name}.pc
