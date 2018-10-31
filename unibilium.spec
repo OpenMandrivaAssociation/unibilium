@@ -4,7 +4,7 @@
 
 Name:           unibilium
 Version:        1.2.1
-Release:        1
+Release:        2
 Summary:        A terminfo parsing library
 License:        LGPL-3.0+
 Group:          System/Libraries
