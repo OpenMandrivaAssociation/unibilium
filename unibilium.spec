@@ -3,7 +3,7 @@
 %define devname %mklibname unibilium -d
 
 Name:           unibilium
-Version:        1.2.1
+Version:	2.0.0
 Release:        2
 Summary:        A terminfo parsing library
 License:        LGPL-3.0+
