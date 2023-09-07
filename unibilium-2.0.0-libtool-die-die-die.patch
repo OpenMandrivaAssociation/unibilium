@@ -1,0 +1,86 @@
+diff -up unibilium-2.0.0/Makefile.omv~ unibilium-2.0.0/Makefile
+--- unibilium-2.0.0/Makefile.omv~	2023-09-07 01:55:40.378581763 +0100
++++ unibilium-2.0.0/Makefile	2023-09-07 01:59:47.349290030 +0100
+@@ -2,13 +2,8 @@ ifneq ($(wildcard .maint),)
+   include maint.mk
+ endif
+ 
+-ifeq ($(shell uname),Darwin)
+-  LIBTOOL?=glibtool
+-else
+-  LIBTOOL?=libtool
+-endif
+-
+ CFLAGS?=-O2
++override CFLAGS += -fPIC
+ 
+ CFLAGS_DEBUG=
+ 
+@@ -52,8 +47,8 @@ ifeq ($(DEBUG),1)
+   CFLAGS_DEBUG=-ggdb -DDEBUG
+ endif
+ 
+-OBJECTS=unibilium.lo uninames.lo uniutil.lo
+-LIBRARY=libunibilium.la
++OBJECTS=unibilium.o uninames.o uniutil.o
++LIBRARY=libunibilium.so.4.0.0
+ 
+ PODS=$(wildcard doc/*.pod)
+ MANPAGES=$(addprefix man/,$(notdir $(PODS:.pod=.3.gz)))
+@@ -65,20 +60,20 @@ TESTS=$(wildcard t/*.c)
+ .PHONY: all
+ all: $(LIBRARY) build-man build-tools build-test
+ 
+-%.lo: %.c unibilium.h
+-	$(LIBTOOL) --mode=compile --tag=CC $(CC) -I. -Wall -std=c99 $(CFLAGS) $(CFLAGS_DEBUG) -o $@ -c $<
++%.o: %.c unibilium.h
++	$(CC) -I. -Wall -std=c99 $(CFLAGS) $(CFLAGS_DEBUG) -o $@ -c $<
+ 
+-uniutil.lo: uniutil.c unibilium.h
+-	$(LIBTOOL) --mode=compile --tag=CC $(CC) -I. -DTERMINFO_DIRS='$(TERMINFO_DIRS)' -Wall -std=c99 $(CFLAGS) $(CFLAGS_DEBUG) -o $@ -c $<
++uniutil.o: uniutil.c unibilium.h
++	$(CC) -I. -DTERMINFO_DIRS='$(TERMINFO_DIRS)' -Wall -std=c99 $(CFLAGS) $(CFLAGS_DEBUG) -o $@ -c $<
+ 
+ $(LIBRARY): $(OBJECTS)
+-	$(LIBTOOL) --mode=link --tag=CC $(CC) $(LDFLAGS) -rpath '$(LIBDIR)' -version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE) -o $@ $^
++	$(CC) $(LDFLAGS) -shared -Wl,-soname,libunibilium.so.$(LT_CURRENT) -o $@ $^
+ 
+-tools/%: $(LIBRARY) tools/%.lo
+-	$(LIBTOOL) --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ $^
++tools/%: $(LIBRARY) tools/%.o
++	$(CC) $(LDFLAGS) -o $@ $^
+ 
+-%.t: $(LIBRARY) %.lo
+-	$(LIBTOOL) --mode=link --tag=CC $(CC) $(LDFLAGS) -o $@ $^
++%.t: $(LIBRARY) %.o
++	$(CC) $(LDFLAGS) -o $@ $^
+ 
+ .PHONY: build-tools
+ build-tools: $(TOOLS:.c=)
+@@ -93,13 +88,11 @@ test: build-test
+ 
+ .PHONY: clean
+ clean:
+-	$(LIBTOOL) --mode=clean rm -f $(OBJECTS) $(LIBRARY) $(MANPAGES)
+-	$(LIBTOOL) --mode=clean rm -f tools/.libs/* t/.libs/*  # XXX there has to be a better way
+-	$(LIBTOOL) --mode=clean rm -f $(TOOLS:.c=) $(TOOLS:.c=.o) $(TESTS:.c=.t) $(TESTS:.c=.o)
++	rm -f $(OBJECTS) $(LIBRARY) $(MANPAGES)
++	rm -f $(TOOLS:.c=) $(TOOLS:.c=.o) $(TESTS:.c=.t) $(TESTS:.c=.o)
+ 
+ .PHONY: install
+ install: install-inc install-lib install-man
+-	$(LIBTOOL) --mode=finish '$(DESTDIR)$(LIBDIR)'
+ 
+ .PHONY: install-inc
+ install-inc:
+@@ -111,7 +104,9 @@ install-inc:
+ .PHONY: install-lib
+ install-lib:
+ 	mkdir -p '$(DESTDIR)$(LIBDIR)'
+-	$(LIBTOOL) --mode=install cp $(LIBRARY) '$(DESTDIR)$(LIBDIR)/$(LIBRARY)'
++	install -c -m755 $(LIBRARY) '$(DESTDIR)$(LIBDIR)/$(LIBRARY)'
++	ln -s $(LIBRARY) '$(DESTDIR)$(LIBDIR)/libunibilium.so.4'
++	ln -s $(LIBRARY) '$(DESTDIR)$(LIBDIR)/libunibilium.so'
+ 
+ .PHONY: install-man
+ install-man: build-man
