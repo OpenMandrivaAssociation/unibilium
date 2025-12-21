@@ -15,6 +15,7 @@ Source:         https://github.com/mauke/unibilium/archive/v%{version}/unibilium
 # doesn't serve any valid purpose. Begone!
 Patch0:		unibilium-2.0.0-libtool-die-die-die.patch
 
+BuildRequires:	make
 %description
 Unibilium is a very basic terminfo library. It doesn't depend on curses or any
 other library. It also doesn't use global variables, so it should be
